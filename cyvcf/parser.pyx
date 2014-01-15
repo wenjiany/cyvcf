@@ -812,7 +812,7 @@ cdef class Reader(object):
     cdef char _prepend_chr
     cdef object reader
     cdef bint compressed, prepend_chr
-    cdef dict metadata, infos, filters, formats, _sample_indexes
+    cdef dict metadata, infos, filters, formats, _sample_indexes, _orig_sample_indexes
     cdef list _header_lines, samples, samp_data
     cdef object _tabix
     cdef object filename
@@ -943,6 +943,7 @@ cdef class Reader(object):
             self.samples = fields[9:]
             self.num_samples = len(self.samples)
             self._sample_indexes = dict([(x,i) for (i,x) in enumerate(self.samples)])
+            self._orig_sample_indexes = dict([(x,i) for (i,x) in enumerate(self.samples)])
         else:
              sys.exit("Expected column definition line beginning with #.  Not found - exiting.")
 
@@ -1193,7 +1194,7 @@ cdef class Reader(object):
 
         # collect GENOTYPE information for the current VCF record (self.curr_record)
         if fmt is not None:
-            sample_info = self._parse_samples(row[9:], fmt)
+            sample_info = self._parse_samples([row[i + 9] for i in sorted(self._orig_sample_indexes.values())], fmt)
             self.curr_record.samples = sample_info.samples
             self.curr_record.gt_bases = sample_info.gt_bases
             self.curr_record.gt_types = sample_info.gt_types
@@ -1253,7 +1254,7 @@ cdef class Reader(object):
 
         # collect GENOTYPE information for the current VCF record (self.curr_record)
         if fmt is not None:
-            sample_info = other._parse_samples(row[9:], fmt)
+            sample_info = other._parse_samples([row[i + 9] for i in sorted(other._orig_sample_indexes.values())], fmt)
             curr_record.samples = sample_info.samples
             curr_record.gt_bases = sample_info.gt_bases
             curr_record.gt_types = sample_info.gt_types
@@ -1300,6 +1301,18 @@ cdef class Reader(object):
         self.reader = self._tabix.fetch(chrom, start, end)
         return self
 
+    def subset_by_samples(self, selected_samples):
+        """ select samples for output """
+
+        common_sample_indexes = [i for i in xrange(self.num_samples) if self.samples[i] in selected_samples]
+        if (len(common_sample_indexes) == 0) :
+            raise Exception("Samples not found")
+            
+        self.samples = [self.samples[i] for i in common_sample_indexes]
+        self.num_samples = len(self.samples)
+
+        self._sample_indexes = dict([(x,i) for (i,x) in enumerate(self.samples)])
+        self._orig_sample_indexes = dict((k, self._orig_sample_indexes[k]) for k in self.samples)
 
 class Writer(object):
     """ VCF Writer """

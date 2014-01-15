@@ -719,7 +719,24 @@ class TestUtils(unittest.TestCase):
                 assert recs[1] is not None
 
 
+class TestSampleSubsetting(unittest.TestCase):
 
+  def test_samplesubset(self):
+    r = cyvcf.Reader(fh('tb.vcf.gz'))
+    assert ['NA00001', 'NA00002', 'NA00003'] == r.samples
+    record = r.next()
+    assert record.genotype('NA00001')['GT'] == '0|0'
+    r = cyvcf.Reader(fh('tb.vcf.gz')) 
+    r.subset_by_samples(['NA00002', 'NA00003'])
+    assert ['NA00002', 'NA00003'] == r.samples
+    record = r.next()
+    assert record.genotype('NA00002')['GT'] == '1|0'
+    r = cyvcf.Reader(fh('tb.vcf.gz'))
+    r.subset_by_samples(['NA00003'])
+    assert ['NA00003'] == r.samples
+    record = r.next()
+    record = r.next()
+    assert record.genotype('NA00003')['GT'] == '0/0'
 
 
 suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestGatkOutput))
@@ -733,3 +750,5 @@ suite.addTests(unittest.TestLoader().loadTestsFromTestCase(Test1kg))
 suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestRecord))
 suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestCall))
 suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestRegression))
+suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestSampleSubsetting))
+
