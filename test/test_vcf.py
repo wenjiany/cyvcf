@@ -726,17 +726,31 @@ class TestSampleSubsetting(unittest.TestCase):
     assert ['NA00001', 'NA00002', 'NA00003'] == r.samples
     record = r.next()
     assert record.genotype('NA00001')['GT'] == '0|0'
+    r.subset_by_samples([])
+    assert [] == r.samples
+    with self.assertRaises(Exception) as context:
+        record.subset_by_samples('NA00003')
+    r.reset_samples()
+    assert ['NA00001', 'NA00002', 'NA00003'] == r.samples
+    record = r.next()
+    assert record.genotype('NA00003')['GT'] == '0/0'
+
+
     r = cyvcf.Reader(fh('tb.vcf.gz')) 
     r.subset_by_samples(['NA00002', 'NA00003'])
     assert ['NA00002', 'NA00003'] == r.samples
     record = r.next()
     assert record.genotype('NA00002')['GT'] == '1|0'
+
     r = cyvcf.Reader(fh('tb.vcf.gz'))
     r.subset_by_samples('NA00003')
     assert ['NA00003'] == r.samples
     record = r.next()
     record = r.next()
     assert record.genotype('NA00003')['GT'] == '0/0'
+
+    with self.assertRaises(Exception) as context:
+        record.subset_by_samples('NA00002')
 
 
 suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestGatkOutput))
