@@ -732,7 +732,7 @@ class TestSampleSubsetting(unittest.TestCase):
     record = r.next()
     assert record.genotype('NA00002')['GT'] == '1|0'
     r = cyvcf.Reader(fh('tb.vcf.gz'))
-    r.subset_by_samples(['NA00003'])
+    r.subset_by_samples('NA00003')
     assert ['NA00003'] == r.samples
     record = r.next()
     record = r.next()
