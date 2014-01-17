@@ -1317,7 +1317,7 @@ cdef class Reader(object):
             selected_samples = [selected_samples]
         
         common_sample_indexes = [i for i in xrange(self.num_samples) if self.samples[i] in selected_samples]
-        if (len(common_sample_indexes) == 0) :
+        if (len(selected_samples) > 0 and len(common_sample_indexes) == 0) :
             raise Exception("Samples not found")
             
         self.samples = [self.samples[i] for i in common_sample_indexes]
