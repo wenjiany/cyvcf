@@ -453,7 +453,7 @@ cdef class _Record(object):
         self.FORMAT = tmp
 
     def add_filter(self, flt):
-        if self.FILTER is None or self.FILTER == b'PASS':
+        if self.FILTER is None: ## or self.FILTER == b'PASS':
             self.FILTER = b''
         else:
             tmp = self.FILTER + ';'
@@ -1178,7 +1178,8 @@ cdef class Reader(object):
             qual = float(row[5])
         #FILT
         cdef object filt = row[6].split(';') if ';' in row[6] else row[6]
-        if filt == b'PASS' or filt == b'.':
+        ## if filt == b'PASS' or filt == b'.':
+        if filt == b'.':
              filt = None
         #INFO
         cdef dict info = self._parse_info(row[7])
@@ -1242,7 +1243,8 @@ cdef class Reader(object):
             qual = float(row[5])
         #FILT
         cdef object filt = row[6].split(';') if ';' in row[6] else row[6]
-        if filt == b'PASS' or filt == b'.':
+        ## if filt == b'PASS' or filt == b'.':
+        if filt == b'.':
              filt = None
         #INFO
         cdef dict info = other._parse_info(row[7])
