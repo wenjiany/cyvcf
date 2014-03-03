@@ -1161,7 +1161,7 @@ cdef class Reader(object):
         #CHROM
         cdef bytes chrom = row[0]
         if self._prepend_chr:
-            chrom = 'chr' + chrom
+            chrom = 'chr' + chr(chrom)
         # POS
         cdef int pos = int(row[1])
         # ID
@@ -1225,7 +1225,7 @@ cdef class Reader(object):
         #CHROM
         cdef bytes chrom = row[0]
         if other._prepend_chr:
-            chrom = 'chr' + chrom
+            chrom = 'chr' + chr(chrom)
         # POS
         cdef int pos = int(row[1])
         # ID
